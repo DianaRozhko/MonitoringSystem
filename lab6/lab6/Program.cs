@@ -6,7 +6,7 @@ namespace AirRadiationMonitoring
 	// Клас для зберігання даних моніторингу
 	public class MonitoringData
 	{
-		// Поле для якості повітря (вимірюється у мікрограмах на кубічний метр, PM2.5)
+		// Поле для якості повітря (вимірюється у мікрограмах на кубічний метр)
 		public float AirQuality { get; set; }
 
 		// Поле для рівня радіації (вимірюється у мікрозівертах на годину)
@@ -45,7 +45,7 @@ namespace AirRadiationMonitoring
 			string password = Console.ReadLine(); // Зчитуємо пароль
 
 			// Перевірка логіна і пароля (статичні значення для прикладу)
-			if (username == "admin" && password == "1234")
+			if (username == "Scientist" && password == "system12345")
 			{
 				Console.WriteLine("Авторизація успішна!");
 				return true; // Успішний вхід
@@ -88,7 +88,6 @@ namespace AirRadiationMonitoring
 				Console.WriteLine("Вихід із програми."); // Повідомлення про вихід
 				return; // Завершення програми, якщо авторизація не вдалася
 			}
-
 			// Запуск моніторингу
 			StartMonitoring();
 		}
