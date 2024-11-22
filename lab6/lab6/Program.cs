@@ -6,66 +6,87 @@ namespace AirRadiationMonitoring
 	// Клас для зберігання даних моніторингу
 	public class MonitoringData
 	{
-		public float AirQuality { get; set; } // Якість повітря (PM2.5)
-		public float Radiation { get; set; }  // Радіаційний фон (мкЗв/год)
+		// Поле для якості повітря (вимірюється у мікрограмах на кубічний метр, PM2.5)
+		public float AirQuality { get; set; }
+
+		// Поле для рівня радіації (вимірюється у мікрозівертах на годину)
+		public float Radiation { get; set; }
 	}
 
 	class Program
 	{
-		// Функція для генерації даних із датчиків
+		/// <summary>
+		/// Симулює отримання даних із датчиків.
+		/// Генерує випадкові значення для якості повітря та радіаційного фону.
+		/// </summary>
+		/// <returns>Об'єкт типу MonitoringData з випадковими значеннями</returns>
 		static MonitoringData GetSensorData()
 		{
-			Random rand = new Random();
+			Random rand = new Random(); // Ініціалізація генератора випадкових чисел
+
 			return new MonitoringData
 			{
-				AirQuality = 10 + rand.Next(91), // Значення якості повітря від 10 до 100
+				AirQuality = 10 + rand.Next(91), // Якість повітря від 10 до 100
 				Radiation = 0.1f + (float)(rand.NextDouble() * 1.9) // Радіація від 0.1 до 2.0
 			};
 		}
 
-		// Функція входу в систему
+		/// <summary>
+		/// Реалізує авторизацію користувача.
+		/// </summary>
+		/// <returns>Повертає true, якщо логін і пароль правильні, інакше false</returns>
 		static bool Login()
 		{
 			Console.WriteLine("=== Вхід у систему ===");
 			Console.Write("Введіть ім'я користувача: ");
-			string username = Console.ReadLine();
-			Console.Write("Введіть пароль: ");
-			string password = Console.ReadLine();
+			string username = Console.ReadLine(); // Зчитуємо ім'я користувача
 
-			// Простий контроль (логін: "admin", пароль: "1234")
+			Console.Write("Введіть пароль: ");
+			string password = Console.ReadLine(); // Зчитуємо пароль
+
+			// Перевірка логіна і пароля (статичні значення для прикладу)
 			if (username == "admin" && password == "1234")
 			{
 				Console.WriteLine("Авторизація успішна!");
-				return true;
+				return true; // Успішний вхід
 			}
 			else
 			{
 				Console.WriteLine("Невірне ім'я користувача або пароль.");
-				return false;
+				return false; // Невдалий вхід
 			}
 		}
 
-		// Функція для запуску моніторингу
+		/// <summary>
+		/// Запускає моніторинг у режимі реального часу.
+		/// Дані відображаються кожні 2 секунди.
+		/// </summary>
 		static void StartMonitoring()
 		{
 			Console.WriteLine("\n=== Запуск моніторингу ===");
 			Console.WriteLine("Натисніть Ctrl+C для завершення.\n");
 
-			while (true)
+			while (true) // Безкінечний цикл для постійного відображення даних
 			{
-				MonitoringData data = GetSensorData();
+				MonitoringData data = GetSensorData(); // Отримання даних із датчиків
+
+				// Виведення даних у консоль
 				Console.WriteLine($"Якість повітря (PM2.5): {data.AirQuality:F2} мкг/м³ | Радіація: {data.Radiation:F2} мкЗв/год");
-				Thread.Sleep(2000); // Очікування 2 секунди перед оновленням
+
+				Thread.Sleep(2000); // Затримка на 2 секунди перед наступним оновленням
 			}
 		}
 
 		static void Main(string[] args)
 		{
-			// Авторизація
+			// Встановлення кодування UTF-8 для коректного відображення української мови
+			Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+			// Авторизація користувача
 			if (!Login())
 			{
-				Console.WriteLine("Вихід із програми.");
-				return;
+				Console.WriteLine("Вихід із програми."); // Повідомлення про вихід
+				return; // Завершення програми, якщо авторизація не вдалася
 			}
 
 			// Запуск моніторингу
