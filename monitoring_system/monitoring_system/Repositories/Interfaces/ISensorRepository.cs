@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DAL.Entities;
 
 namespace DAL.Repositories.Interfaces
 {
-    internal interface Interface1
+    public interface ISensorRepository
     {
+        List<Sensor> GetAllSensors();
+        Sensor GetSensorById(int id);
     }
 }
