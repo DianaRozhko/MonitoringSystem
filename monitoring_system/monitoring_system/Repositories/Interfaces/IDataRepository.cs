@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities;
-using DAL.Repositories.Impl;
+using DAL.EF.Impl;
 
-namespace DAL.Repositories.Interfaces
+namespace DAL.EF.Interfaces
 {
     public interface IDataRepository
     {

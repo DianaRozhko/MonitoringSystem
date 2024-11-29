@@ -1,47 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DAL.Repositories.Impl;
-using DAL.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
+﻿using DAL.EF.Impl;
+using DAL.EF.Interfaces;
+using DAL.UnitOfWork; // Доступ до інтерфейсів репозиторіїв
 
 namespace DAL.EF
 {
-    public class UnitOfWork : DAL.UnitOfWork.IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
-        private DatabaseContext _context;
+        private readonly DatabaseContext _context;
 
-        public ISensorRepository SensorRepository { get; }
-        public IDataRepository DataRepository { get; }
-        public IScientistRepository ScientistRepository { get; }
+        public ISensorRepository SensorRepository { get; private set; }
+        public IDataRepository DataRepository { get; private set; }
+        public IScientistRepository ScientistRepository { get; private set; }
 
         public UnitOfWork(DatabaseContext context)
         {
-            _context = context;
-
-            // Ініціалізація репозиторіїв
+            _context = context ?? throw new ArgumentNullException(nameof(context));
             SensorRepository = new SensorRepository(_context);
             DataRepository = new DataRepository(_context);
             ScientistRepository = new ScientistRepository(_context);
-
         }
 
-        /// <summary>
-        /// Зберігає зміни у контексті бази даних.
-        /// </summary>
         public void SaveChanges()
         {
-
+            _context.SaveChanges();
         }
 
-        /// <summary>
-        /// Звільняє ресурси.
-        /// </summary>
         public void Dispose()
         {
-
+            _context.Dispose();
         }
     }
 }

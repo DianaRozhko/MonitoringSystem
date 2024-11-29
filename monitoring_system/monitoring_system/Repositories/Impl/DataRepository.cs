@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.EF;
 using DAL.Entities;
-using DAL.Repositories.Interfaces;
+using DAL.EF.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace DAL.Repositories.Impl
+namespace DAL.EF.Impl
 {
     public class DataRepository : IDataRepository
     {

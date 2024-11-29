@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities;
 
-namespace DAL.Repositories.Interfaces
+namespace DAL.EF.Interfaces
 {
     public interface ISensorRepository
     {

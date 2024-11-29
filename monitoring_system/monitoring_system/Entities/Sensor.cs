@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DAL.Repositories.Impl;
+using DAL.EF.Impl;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DAL.Entities

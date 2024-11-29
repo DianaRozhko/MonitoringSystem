@@ -1,26 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DAL.EF.Interfaces;
 
 namespace DAL.UnitOfWork
 {
-    using DAL.UnitOfWork;
-    using global::DAL.Repositories.Interfaces;
-    using System;
-
-    namespace DAL.UnitOfWork
+    public interface IUnitOfWork : IDisposable
     {
-        public interface IUnitOfWork : IDisposable
-        {
-            ISensorRepository SensorRepository { get; }
-            IDataRepository DataRepository { get; }
-            IScientistRepository ScientistRepository { get; }
-       
+        ISensorRepository SensorRepository { get; }
+        IDataRepository DataRepository { get; }
+        IScientistRepository ScientistRepository { get; }
 
-            void SaveChanges();
-        }
+        void SaveChanges();
     }
-
 }

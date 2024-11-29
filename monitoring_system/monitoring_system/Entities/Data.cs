@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL.Entities;
 
-namespace DAL.Repositories.Impl
+namespace DAL.EF.Impl
 {
     public class Data
     {
