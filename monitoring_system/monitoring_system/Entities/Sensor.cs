@@ -15,6 +15,7 @@ namespace DAL.Entities
         public string Location { get; set; }
         public string Status { get; set; }
         public ICollection<Data> Data { get; set; }
+        public string Name { get; set; }
 
         public Data CollectData()
         {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DAL.Entities;
+﻿using DAL.Entities;
 
 namespace DAL.EF.Impl
 {
@@ -11,10 +6,13 @@ namespace DAL.EF.Impl
     {
         public int Id { get; set; }
         public DateTime Timestamp { get; set; }
-        public int SensorId { get; set; }
+        public int SensorId { get; set; } // Зовнішній ключ
         public double Value { get; set; }
         public string MeasurementType { get; set; }
-        public object Sensor { get; internal set; }
+
+        // Навігаційна властивість
+        public Sensor Sensor { get; set; }
+
         public ICollection<Report> Reports { get; set; }
     }
 }
