@@ -2,71 +2,220 @@ using DAL.EF;
 using DAL.EF.Impl;
 using DAL.Entities;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
-public class DataRepositoryTests
+namespace DAL.Tests
 {
-    [Fact]
-    public async Task GetAllAsync_ReturnsAllData()
+
+    public class DataRepositoryTests
     {
-        // **Arrange**: Налаштування середовища для тесту
-        // Створюємо in-memory базу даних для імітації реальної бази.
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
-            .Options;
-
-        // В рамках блоку using створюємо контекст і додаємо тестові дані.
-        using (var context = new DatabaseContext(options))
+        private DbContextOptions<DatabaseContext> GetInMemoryDatabaseOptions()
         {
-            // Додаємо об'єкт Sensor, оскільки Data має зовнішній ключ SensorId
-            // і цей ключ повинен вказувати на існуючий запис у таблиці Sensors.
-            context.Sensors.Add(new Sensor
-            {
-                Id = 1,                        // Унікальний ідентифікатор сенсора
-                Name = "Temperature Sensor",   // Ім'я сенсора
-                Location = "Room 101",         // Обов’язкова властивість: місцезнаходження
-                Status = "Active",             // Обов’язкова властивість: статус
-                Type = "Thermometer"           // Обов’язкова властивість: тип сенсора
-            });
-
-            // Додаємо кілька записів Data, пов'язаних із сенсором
-            context.Data.Add(new Data
-            {
-                Id = 1,                        // Унікальний ідентифікатор запису Data
-                Timestamp = DateTime.UtcNow,   // Час створення запису
-                SensorId = 1,                  // Посилання на сенсор (зовнішній ключ)
-                Value = 25.5,                  // Значення, яке виміряв сенсор
-                MeasurementType = "Temperature"// Тип вимірювання
-            });
-            context.Data.Add(new Data
-            {
-                Id = 2,                        // Другий запис Data
-                Timestamp = DateTime.UtcNow,   // Час створення запису
-                SensorId = 1,                  // Посилання на той же сенсор
-                Value = 30.2,                  // Значення, яке виміряв сенсор
-                MeasurementType = "Temperature"// Тип вимірювання
-            });
-
-            // Зберігаємо зміни в in-memory базі
-            await context.SaveChangesAsync();
+            // Унікальна назва для кожної бази даних
+            return new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_" + Guid.NewGuid()) // Додаємо унікальний GUID
+                .Options;
         }
 
-        // **Act**: Виклик методу репозиторію для перевірки
-        // В рамках блоку using створюємо новий контекст для ізоляції дій тесту.
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public async Task GetAllAsync_ReturnsAllData()
         {
-            // Ініціалізуємо репозиторій DataRepository, який будемо тестувати.
-            var repository = new DataRepository(context);
+            // **Arrange**: Налаштування середовища для тесту
+            var options = GetInMemoryDatabaseOptions();
 
-            // Викликаємо метод GetAllAsync(), який має повернути всі записи Data.
-            var data = await repository.GetAllAsync();
+            // Додаємо тестові дані
+            using (var context = new DatabaseContext(options))
+            {
+                context.Sensors.Add(new Sensor
+                {
+                    Id = 1,
+                    Name = "Temperature Sensor",
+                    Location = "Reactor Zone",
+                    Status = "Active",
+                    Type = "Temperature"
+                });
 
-            // **Assert**: Перевірка результатів тесту
-            // Переконуємося, що метод повернув саме два записи.
-            Assert.Equal(2, data.Count());
+                context.Data.Add(new Data
+                {
+                    Id = 1,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 25.5,
+                    MeasurementType = "Celsius"
+                });
+                context.Data.Add(new Data
+                {
+                    Id = 2,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 30.2,
+                    MeasurementType = "Celsius"
+                });
 
-            // Перевіряємо, що обидва записи присутні у результатах.
-            Assert.Contains(data, d => d.Id == 1 && d.Value == 25.5); // Перший запис
-            Assert.Contains(data, d => d.Id == 2 && d.Value == 30.2); // Другий запис
+                await context.SaveChangesAsync();
+            }
+
+            // **Act**: Перевірка виклику методу
+            using (var context = new DatabaseContext(options))
+            {
+                var repository = new DataRepository(context);
+                var data = await repository.GetAllAsync();
+
+                // **Assert**: Перевірка результатів
+                Assert.Equal(2, data.Count());
+                Assert.Contains(data, d => d.Id == 1 && d.Value == 25.5);
+                Assert.Contains(data, d => d.Id == 2 && d.Value == 30.2);
+            }
+        }
+
+        [Fact]
+        public async Task GetByIdAsync_ReturnsCorrectData()
+        {
+            // **Arrange**
+            var options = GetInMemoryDatabaseOptions();
+            using (var context = new DatabaseContext(options))
+            {
+                context.Sensors.Add(new Sensor
+                {
+                    Id = 1,
+                    Name = "Temperature Sensor",
+                    Location = "Reactor Zone",
+                    Status = "Active",
+                    Type = "Temperature"
+                });
+
+                context.Data.Add(new Data
+                {
+                    Id = 1,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 25.5,
+                    MeasurementType = "Celsius"
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            // **Act**
+            using (var context = new DatabaseContext(options))
+            {
+                var repository = new DataRepository(context);
+                var data = await repository.GetByIdAsync(1);
+
+                // **Assert**
+                Assert.NotNull(data);
+                Assert.Equal(1, data.Id);
+                Assert.Equal(25.5, data.Value);
+            }
+        }
+
+        [Fact]
+        public async Task GetBySensorIdAsync_ReturnsCorrectData()
+        {
+            // **Arrange**
+            var options = GetInMemoryDatabaseOptions();
+            using (var context = new DatabaseContext(options))
+            {
+                context.Sensors.Add(new Sensor
+                {
+                    Id = 1,
+                    Name = "Temperature Sensor",
+                    Location = "Reactor Zone",
+                    Status = "Active",
+                    Type = "Temperature"
+                });
+
+                context.Data.Add(new Data
+                {
+                    Id = 1,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 25.5,
+                    MeasurementType = "Celsius"
+                });
+                context.Data.Add(new Data
+                {
+                    Id = 2,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 30.2,
+                    MeasurementType = "Celsius"
+                });
+
+                context.Data.Add(new Data
+                {
+                    Id = 3,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 2,
+                    Value = 15.3,
+                    MeasurementType = "Celsius"
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            // **Act**
+            using (var context = new DatabaseContext(options))
+            {
+                var repository = new DataRepository(context);
+                var data = await repository.GetBySensorIdAsync(1);
+
+                // **Assert**
+                Assert.Equal(2, data.Count());
+                Assert.Contains(data, d => d.SensorId == 1 && d.Value == 25.5);
+                Assert.Contains(data, d => d.SensorId == 1 && d.Value == 30.2);
+            }
+        }
+
+        [Fact]
+        public async Task GetByDateRangeAsync_ReturnsCorrectData()
+        {
+            // **Arrange**
+            var options = GetInMemoryDatabaseOptions();
+            var startDate = DateTime.UtcNow.AddDays(-1);
+            var endDate = DateTime.UtcNow.AddDays(1);
+
+            using (var context = new DatabaseContext(options))
+            {
+                context.Sensors.Add(new Sensor
+                {
+                    Id = 1,
+                    Name = "Temperature Sensor",
+                    Location = "Reactor Zone",
+                    Status = "Active",
+                    Type = "Temperature"
+                });
+
+                context.Data.Add(new Data
+                {
+                    Id = 1,
+                    Timestamp = DateTime.UtcNow,
+                    SensorId = 1,
+                    Value = 25.5,
+                    MeasurementType = "Celsius"
+                });
+                context.Data.Add(new Data
+                {
+                    Id = 2,
+                    Timestamp = DateTime.UtcNow.AddDays(-2),
+                    SensorId = 1,
+                    Value = 30.2,
+                    MeasurementType = "Celsius"
+                });
+
+                await context.SaveChangesAsync();
+            }
+
+            // **Act**
+            using (var context = new DatabaseContext(options))
+            {
+                var repository = new DataRepository(context);
+                var data = await repository.GetByDateRangeAsync(startDate, endDate);
+
+                // **Assert**
+                Assert.Single(data);  // Лише один запис у вказаному діапазоні дат
+                Assert.Equal(25.5, data.First().Value);
+            }
         }
     }
 }

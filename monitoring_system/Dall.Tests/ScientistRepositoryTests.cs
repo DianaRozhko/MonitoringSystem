@@ -8,186 +8,189 @@ using DAL.EF.Impl;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-public class ScientistRepositoryTests
+namespace DAL.Tests
 {
-    [Fact]
-    public void AddScientist_AddsNewScientistSuccessfully()
+    public class ScientistRepositoryTests
     {
-        // **Arrange**: Налаштовуємо середовище тесту
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Add")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void AddScientist_AddsNewScientistSuccessfully()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**: Налаштовуємо середовище тесту
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Add")
+                .Options;
 
-            // Створюємо тестовий об'єкт Scientist
-            var scientist = new Scientist
+            using (var context = new DatabaseContext(options))
             {
-                Id = 1,
-                Name = "Jorgi Define",
-                Username = "jorgidef",
-                Password = "password123"
-            };
+                var repository = new ScientistRepository(context);
 
-            // **Act**: Додаємо Scientist у репозиторій
-            repository.AddScientist(scientist);
+                // Створюємо тестовий об'єкт Scientist
+                var scientist = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define",
+                    Username = "jorgidef",
+                    Password = "password123"
+                };
 
-            // **Assert**: Перевіряємо, що Scientist було додано успішно
-            var retrievedScientist = repository.GetScientistByUsername("jorgidef");
-            Assert.NotNull(retrievedScientist);
-            Assert.Equal("Jorgi Define", retrievedScientist.Name);
+                // **Act**: Додаємо Scientist у репозиторій
+                repository.AddScientist(scientist);
+
+                // **Assert**: Перевіряємо, що Scientist було додано успішно
+                var retrievedScientist = repository.GetScientistByUsername("jorgidef");
+                Assert.NotNull(retrievedScientist);
+                Assert.Equal("Jorgi Define", retrievedScientist.Name);
+            }
         }
-    }
 
-    [Fact]
-    public void AddScientist_ThrowsExceptionIfUsernameExists()
-    {
-        // **Arrange**
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Add_Duplicate")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void AddScientist_ThrowsExceptionIfUsernameExists()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Add_Duplicate")
+                .Options;
 
-            var scientist1 = new Scientist
+            using (var context = new DatabaseContext(options))
             {
-                Id = 1,
-                Name = "Jorgi Define",
-                Username = "jorgidef",
-                Password = "password123"
-            };
+                var repository = new ScientistRepository(context);
 
-            var scientist2 = new Scientist
-            {
-                Id = 2,
-                Name = "Jane Smith",
-                Username = "jorgidef", // Такий самий Username
-                Password = "password456"
-            };
+                var scientist1 = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define",
+                    Username = "jorgidef",
+                    Password = "password123"
+                };
 
-            repository.AddScientist(scientist1);
+                var scientist2 = new Scientist
+                {
+                    Id = 2,
+                    Name = "Jane Smith",
+                    Username = "jorgidef", // Такий самий Username
+                    Password = "password456"
+                };
 
-            // **Act & Assert**: Додаємо Scientist з тим самим Username і перевіряємо виключення
-            var exception = Assert.Throws<Exception>(() => repository.AddScientist(scientist2));
-            Assert.Equal("A scientist with this username already exists.", exception.Message);
+                repository.AddScientist(scientist1);
+
+                // **Act & Assert**: Додаємо Scientist з тим самим Username і перевіряємо виключення
+                var exception = Assert.Throws<Exception>(() => repository.AddScientist(scientist2));
+                Assert.Equal("A scientist with this username already exists.", exception.Message);
+            }
         }
-    }
 
-    [Fact]
-    public void RemoveScientist_RemovesScientistSuccessfully()
-    {
-        // **Arrange**
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Remove")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void RemoveScientist_RemovesScientistSuccessfully()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Remove")
+                .Options;
 
-            var scientist = new Scientist
+            using (var context = new DatabaseContext(options))
             {
-                Id = 1,
-                Name = "Jorgi Define",
-                Username = "jorgidef",
-                Password = "password123"
-            };
+                var repository = new ScientistRepository(context);
 
-            repository.AddScientist(scientist);
+                var scientist = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define",
+                    Username = "jorgidef",
+                    Password = "password123"
+                };
 
-            // **Act**: Видаляємо Scientist
-            repository.RemoveScientist(1);
+                repository.AddScientist(scientist);
 
-            // **Assert**: Перевіряємо, що Scientist видалено
-            var retrievedScientist = repository.GetScientistById(1);
-            Assert.Null(retrievedScientist);
+                // **Act**: Видаляємо Scientist
+                repository.RemoveScientist(1);
+
+                // **Assert**: Перевіряємо, що Scientist видалено
+                var retrievedScientist = repository.GetScientistById(1);
+                Assert.Null(retrievedScientist);
+            }
         }
-    }
 
-    [Fact]
-    public void RemoveScientist_ThrowsExceptionIfScientistNotFound()
-    {
-        // **Arrange**
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Remove_NotFound")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void RemoveScientist_ThrowsExceptionIfScientistNotFound()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Remove_NotFound")
+                .Options;
 
-            // **Act & Assert**: Перевіряємо виключення, якщо Scientist не знайдено
-            var exception = Assert.Throws<Exception>(() => repository.RemoveScientist(1));
-            Assert.Equal("Scientist not found.", exception.Message);
+            using (var context = new DatabaseContext(options))
+            {
+                var repository = new ScientistRepository(context);
+
+                // **Act & Assert**: Перевіряємо виключення, якщо Scientist не знайдено
+                var exception = Assert.Throws<Exception>(() => repository.RemoveScientist(1));
+                Assert.Equal("Scientist not found.", exception.Message);
+            }
         }
-    }
 
-    [Fact]
-    public void UpdateScientist_UpdatesScientistSuccessfully()
-    {
-        // **Arrange**
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Update")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void UpdateScientist_UpdatesScientistSuccessfully()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Update")
+                .Options;
 
-            var scientist = new Scientist
+            using (var context = new DatabaseContext(options))
             {
-                Id = 1,
-                Name = "Jorgi Define",
-                Username = "jorgidef",
-                Password = "password123"
-            };
+                var repository = new ScientistRepository(context);
 
-            repository.AddScientist(scientist);
+                var scientist = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define",
+                    Username = "jorgidef",
+                    Password = "password123"
+                };
 
-            var updatedScientist = new Scientist
-            {
-                Id = 1,
-                Name = "Jorgi Define Updated",
-                Password = "newpassword"
-            };
+                repository.AddScientist(scientist);
 
-            // **Act**: Оновлюємо Scientist
-            repository.UpdateScientist(updatedScientist);
+                var updatedScientist = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define Updated",
+                    Password = "newpassword"
+                };
 
-            // **Assert**: Перевіряємо, що дані Scientist оновлено
-            var retrievedScientist = repository.GetScientistById(1);
-            Assert.NotNull(retrievedScientist);
-            Assert.Equal("Jorgi Define Updated", retrievedScientist.Name);
-            Assert.Equal("newpassword", retrievedScientist.Password);
+                // **Act**: Оновлюємо Scientist
+                repository.UpdateScientist(updatedScientist);
+
+                // **Assert**: Перевіряємо, що дані Scientist оновлено
+                var retrievedScientist = repository.GetScientistById(1);
+                Assert.NotNull(retrievedScientist);
+                Assert.Equal("Jorgi Define Updated", retrievedScientist.Name);
+                Assert.Equal("newpassword", retrievedScientist.Password);
+            }
         }
-    }
 
-    [Fact]
-    public void UpdateScientist_ThrowsExceptionIfScientistNotFound()
-    {
-        // **Arrange**
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Update_NotFound")
-            .Options;
-
-        using (var context = new DatabaseContext(options))
+        [Fact]
+        public void UpdateScientist_ThrowsExceptionIfScientistNotFound()
         {
-            var repository = new ScientistRepository(context);
+            // **Arrange**
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Scientist_Update_NotFound")
+                .Options;
 
-            var updatedScientist = new Scientist
+            using (var context = new DatabaseContext(options))
             {
-                Id = 1,
-                Name = "Jorgi Define Updated",
-                Password = "newpassword"
-            };
+                var repository = new ScientistRepository(context);
 
-            // **Act & Assert**: Перевіряємо виключення, якщо Scientist не знайдено
-            var exception = Assert.Throws<Exception>(() => repository.UpdateScientist(updatedScientist));
-            Assert.Equal("Scientist not found.", exception.Message);
+                var updatedScientist = new Scientist
+                {
+                    Id = 1,
+                    Name = "Jorgi Define Updated",
+                    Password = "newpassword"
+                };
+
+                // **Act & Assert**: Перевіряємо виключення, якщо Scientist не знайдено
+                var exception = Assert.Throws<Exception>(() => repository.UpdateScientist(updatedScientist));
+                Assert.Equal("Scientist not found.", exception.Message);
+            }
         }
     }
 }
