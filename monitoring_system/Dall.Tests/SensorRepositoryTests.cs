@@ -1,85 +1,103 @@
-﻿using System;
-using System.Collections.Generic;
-using DAL.EF.Impl;
-using DAL.Entities;
-using DAL.EF;
-using Microsoft.EntityFrameworkCore;
-using Xunit;
+﻿using System; // Підключення основних класів .NET
+using System.Collections.Generic; // Підключення для роботи зі списками
+using DAL.EF.Impl; // Підключення реалізацій репозиторіїв для сенсорів
+using DAL.Entities; // Підключення для моделей сутностей (наприклад, Sensor)
+using DAL.EF; // Підключення для роботи з контекстом бази даних
+using Microsoft.EntityFrameworkCore; // Підключення для роботи з Entity Framework Core
+using Xunit; // Підключення бібліотеки для юніт-тестування
 
 namespace DAL.Tests
 {
+    // Клас для тестування репозиторію сенсорів (SensorRepository)
     public class SensorRepositoryTests
     {
-        private readonly SensorRepository _sensorRepository;
-        private readonly DbContextOptions<DatabaseContext> _dbContextOptions;
+        private readonly SensorRepository _sensorRepository; // Репозиторій для роботи з сенсорами
+        private readonly DbContextOptions<DatabaseContext> _dbContextOptions; // Налаштування для контексту бази даних
 
+        // Конструктор для налаштування середовища тестування
         public SensorRepositoryTests()
         {
-            // Arrange: Create options for an in-memory database
+            // **Arrange**: Налаштовуємо опції для In-Memory бази даних для тестів
             _dbContextOptions = new DbContextOptionsBuilder<DatabaseContext>()
-                .UseInMemoryDatabase(databaseName: "SensorTestDb") // In-memory database for testing
+                .UseInMemoryDatabase(databaseName: "SensorTestDb") // Використовуємо In-memory базу для тестів
                 .Options;
 
-            // Create a new context using in-memory database
+            // Створюємо контекст бази даних з налаштованими опціями
             var context = new DatabaseContext(_dbContextOptions);
 
-            // Initialize SensorRepository with the context
+            // Ініціалізуємо репозиторій сенсорів із контекстом
             _sensorRepository = new SensorRepository(context);
 
-            // Seed the in-memory database with initial test data
+            // Заповнюємо базу даних початковими тестовими даними
             SeedDatabase(context);
         }
 
+        // Метод для заповнення бази даних початковими даними (якщо вони ще не існують)
         private void SeedDatabase(DatabaseContext context)
-    {
-        // Перевіряємо, чи існують вже записи з такими ID, перед тим як додавати нові
-        if (!context.Sensors.Any(s => s.Id == 1))
         {
-            context.Sensors.Add(new Sensor { Id = 1, Type = "Air Quality", Location = "Zone A", Status = "Active", Name = "Sensor A" });
+            // Перевіряємо, чи існують вже записи з такими ID, перед тим як додавати нові
+            if (!context.Sensors.Any(s => s.Id == 1))
+            {
+                // Додаємо перший сенсор в базу
+                context.Sensors.Add(new Sensor { Id = 1, Type = "Air Quality", Location = "Zone A", Status = "Active", Name = "Sensor A" });
+            }
+
+            if (!context.Sensors.Any(s => s.Id == 2))
+            {
+                // Додаємо другий сенсор в базу
+                context.Sensors.Add(new Sensor { Id = 2, Type = "Radiation", Location = "Zone B", Status = "Active", Name = "Sensor B" });
+            }
+
+            // Зберігаємо зміни в базі даних
+            context.SaveChanges();
         }
 
-        if (!context.Sensors.Any(s => s.Id == 2))
-        {
-            context.Sensors.Add(new Sensor { Id = 2, Type = "Radiation", Location = "Zone B", Status = "Active", Name = "Sensor B" });
-        }
-
-        context.SaveChanges();
-    }
-
-
+        // Тест для отримання всіх сенсорів з репозиторію
         [Fact]
         public void GetAllSensors_ReturnsAllSensors()
         {
-            // Act
+            // **Act**: Отримуємо список всіх сенсорів
             var result = _sensorRepository.GetAllSensors();
 
-            // Assert
-            Assert.NotNull(result); // Ensure the result is not null
-            Assert.Equal(2, result.Count); // Ensure the correct number of sensors are returned
+            // **Assert**: Перевірка, що результат не є null
+            Assert.NotNull(result);
+
+            // Перевірка, що повертається правильна кількість сенсорів
+            Assert.Equal(2, result.Count);
+
+            // Перевірка, чи міститься сенсор з типом "Air Quality"
             Assert.Contains(result, sensor => sensor.Type == "Air Quality");
+
+            // Перевірка, чи міститься сенсор з типом "Radiation"
             Assert.Contains(result, sensor => sensor.Type == "Radiation");
         }
 
+        // Тест для отримання сенсора за існуючим ID
         [Fact]
         public void GetSensorById_ExistingId_ReturnsCorrectSensor()
         {
-            // Act
+            // **Act**: Отримуємо сенсор за ID 1
             var result = _sensorRepository.GetSensorById(1);
 
-            // Assert
-            Assert.NotNull(result); // Ensure the result is not null
-            Assert.Equal(1, result.Id); // Ensure the correct sensor is returned
-            Assert.Equal("Air Quality", result.Type); // Ensure the sensor has the expected type
+            // **Assert**: Перевірка, що результат не є null
+            Assert.NotNull(result);
+
+            // Перевірка, що повертається сенсор з правильним ID
+            Assert.Equal(1, result.Id);
+
+            // Перевірка, що сенсор має правильний тип
+            Assert.Equal("Air Quality", result.Type);
         }
 
+        // Тест для отримання сенсора за неіснуючим ID
         [Fact]
         public void GetSensorById_NonExistingId_ReturnsNull()
         {
-            // Act
+            // **Act**: Отримуємо сенсор за ID 99 (якого не існує)
             var result = _sensorRepository.GetSensorById(99);
 
-            // Assert
-            Assert.Null(result); // Ensure the result is null as no sensor exists with this ID
+            // **Assert**: Перевірка, що результат є null, оскільки сенсор з таким ID не знайдений
+            Assert.Null(result);
         }
     }
 }
