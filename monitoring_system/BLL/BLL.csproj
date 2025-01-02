@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>BLL</RootNamespace>
     <AssemblyName>BLL</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFramework>net8.0</TargetFramework>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -37,6 +37,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Dall.Tests\Dall.Tests.csproj">
+      <Project>{8448fdad-bbdf-4b3c-8468-c6113d921ed8}</Project>
+      <Name>Dall.Tests</Name>
+    </ProjectReference>
     <ProjectReference Include="..\monitoring_system\DAL.csproj">
       <Project>{42d06e45-a73e-4fce-b025-8706d57114c2}</Project>
       <Name>DAL</Name>
