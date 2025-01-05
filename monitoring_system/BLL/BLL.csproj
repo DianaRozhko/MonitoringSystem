@@ -1,61 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B79A0142-9CE9-4052-B11D-48D0FAC5BF09}</ProjectGuid>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>BLL</RootNamespace>
-    <AssemblyName>BLL</AssemblyName>
-    <TargetFramework>net8.0</TargetFramework>
-    <FileAlignment>512</FileAlignment>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Dall.Tests\Dall.Tests.csproj">
-      <Project>{8448fdad-bbdf-4b3c-8468-c6113d921ed8}</Project>
-      <Name>Dall.Tests</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\monitoring_system\DAL.csproj">
-      <Project>{42d06e45-a73e-4fce-b025-8706d57114c2}</Project>
-      <Name>DAL</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="DTO\DataDTO.cs" />
-    <Compile Include="DTO\ScientistDTO.cs" />
-    <Compile Include="DTO\SensorDTO.cs" />
-    <Compile Include="Services\Impl\DataService.cs" />
-    <Compile Include="Services\Impl\ScientistService.cs" />
-    <Compile Include="Services\Impl\SensorService.cs" />
-    <Compile Include="Services\Interfaces\IDataService.cs" />
-    <Compile Include="Services\Interfaces\IScientistService.cs" />
-    <Compile Include="Services\Interfaces\ISensorService.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+
+		<RootNamespace>BLL</RootNamespace>
+		<AssemblyName>BLL</AssemblyName>
+	</PropertyGroup>
+
+	<ItemGroup>
+		
+		<ProjectReference Include="..\DAL\DAL.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		
+		<PackageReference Include="AutoMapper" Version="13.0.1" />
+	</ItemGroup>
 </Project>

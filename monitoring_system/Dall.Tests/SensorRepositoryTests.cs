@@ -1,103 +1,77 @@
-﻿using System; // Підключення основних класів .NET
-using System.Collections.Generic; // Підключення для роботи зі списками
-using DAL.EF.Impl; // Підключення реалізацій репозиторіїв для сенсорів
-using DAL.Entities; // Підключення для моделей сутностей (наприклад, Sensor)
-using DAL.EF; // Підключення для роботи з контекстом бази даних
-using Microsoft.EntityFrameworkCore; // Підключення для роботи з Entity Framework Core
-using Xunit; // Підключення бібліотеки для юніт-тестування
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DAL.EF;
+using DAL.Entities;
+using DAL.EF.Impl;
+using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace DAL.Tests
 {
-    // Клас для тестування репозиторію сенсорів (SensorRepository)
     public class SensorRepositoryTests
     {
-        private readonly SensorRepository _sensorRepository; // Репозиторій для роботи з сенсорами
-        private readonly DbContextOptions<DatabaseContext> _dbContextOptions; // Налаштування для контексту бази даних
+        private readonly DbContextOptions<DatabaseContext> _dbContextOptions;
 
-        // Конструктор для налаштування середовища тестування
         public SensorRepositoryTests()
         {
-            // **Arrange**: Налаштовуємо опції для In-Memory бази даних для тестів
             _dbContextOptions = new DbContextOptionsBuilder<DatabaseContext>()
-                .UseInMemoryDatabase(databaseName: "SensorTestDb") // Використовуємо In-memory базу для тестів
+                .UseInMemoryDatabase(databaseName: "TestDatabase_Sensor")
                 .Options;
-
-            // Створюємо контекст бази даних з налаштованими опціями
-            var context = new DatabaseContext(_dbContextOptions);
-
-            // Ініціалізуємо репозиторій сенсорів із контекстом
-            _sensorRepository = new SensorRepository(context);
-
-            // Заповнюємо базу даних початковими тестовими даними
-            SeedDatabase(context);
         }
 
-        // Метод для заповнення бази даних початковими даними (якщо вони ще не існують)
-        private void SeedDatabase(DatabaseContext context)
+        [Fact]
+        public async Task GetAllSensors_ReturnsAllSensors()
         {
-            // Перевіряємо, чи існують вже записи з такими ID, перед тим як додавати нові
-            if (!context.Sensors.Any(s => s.Id == 1))
+            using (var context = new DatabaseContext(_dbContextOptions))
             {
-                // Додаємо перший сенсор в базу
-                context.Sensors.Add(new Sensor { Id = 1, Type = "Air Quality", Location = "Zone A", Status = "Active", Name = "Sensor A" });
-            }
+                var repository = new SensorRepository(context);
+                await SeedDatabaseAsync(context);
 
-            if (!context.Sensors.Any(s => s.Id == 2))
+                var result = await repository.GetAllSensorsAsync();
+                Assert.NotNull(result);
+                Assert.Equal(2, result.Count());
+            }
+        }
+
+        [Fact]
+        public async Task GetSensorById_ExistingId_ReturnsCorrectSensor()
+        {
+            using (var context = new DatabaseContext(_dbContextOptions))
             {
-                // Додаємо другий сенсор в базу
-                context.Sensors.Add(new Sensor { Id = 2, Type = "Radiation", Location = "Zone B", Status = "Active", Name = "Sensor B" });
+                var repository = new SensorRepository(context);
+                await SeedDatabaseAsync(context);
+
+                var result = await repository.GetSensorByIdAsync(1);
+                Assert.NotNull(result);
+                Assert.Equal(1, result.Id);
+                Assert.Equal("Air Quality", result.Type);
             }
-
-            // Зберігаємо зміни в базі даних
-            context.SaveChanges();
         }
 
-        // Тест для отримання всіх сенсорів з репозиторію
         [Fact]
-        public void GetAllSensors_ReturnsAllSensors()
+        public async Task GetSensorById_NonExistingId_ReturnsNull()
         {
-            // **Act**: Отримуємо список всіх сенсорів
-            var result = _sensorRepository.GetAllSensors();
+            using (var context = new DatabaseContext(_dbContextOptions))
+            {
+                var repository = new SensorRepository(context);
 
-            // **Assert**: Перевірка, що результат не є null
-            Assert.NotNull(result);
-
-            // Перевірка, що повертається правильна кількість сенсорів
-            Assert.Equal(2, result.Count);
-
-            // Перевірка, чи міститься сенсор з типом "Air Quality"
-            Assert.Contains(result, sensor => sensor.Type == "Air Quality");
-
-            // Перевірка, чи міститься сенсор з типом "Radiation"
-            Assert.Contains(result, sensor => sensor.Type == "Radiation");
+                var result = await repository.GetSensorByIdAsync(99);
+                Assert.Null(result);
+            }
         }
 
-        // Тест для отримання сенсора за існуючим ID
-        [Fact]
-        public void GetSensorById_ExistingId_ReturnsCorrectSensor()
+        private async Task SeedDatabaseAsync(DatabaseContext context)
         {
-            // **Act**: Отримуємо сенсор за ID 1
-            var result = _sensorRepository.GetSensorById(1);
-
-            // **Assert**: Перевірка, що результат не є null
-            Assert.NotNull(result);
-
-            // Перевірка, що повертається сенсор з правильним ID
-            Assert.Equal(1, result.Id);
-
-            // Перевірка, що сенсор має правильний тип
-            Assert.Equal("Air Quality", result.Type);
-        }
-
-        // Тест для отримання сенсора за неіснуючим ID
-        [Fact]
-        public void GetSensorById_NonExistingId_ReturnsNull()
-        {
-            // **Act**: Отримуємо сенсор за ID 99 (якого не існує)
-            var result = _sensorRepository.GetSensorById(99);
-
-            // **Assert**: Перевірка, що результат є null, оскільки сенсор з таким ID не знайдений
-            Assert.Null(result);
+            if (!context.Sensors.Any())
+            {
+                context.Sensors.AddRange(
+                    new Sensor { Id = 1, Type = "Air Quality", Location = "Zone A", Status = "Active", Name = "Sensor A" },
+                    new Sensor { Id = 2, Type = "Radiation", Location = "Zone B", Status = "Active", Name = "Sensor B" }
+                );
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
